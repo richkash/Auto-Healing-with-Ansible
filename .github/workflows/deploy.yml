@@ -1,27 +1,21 @@
 name: AWS AutoHealing Deployment
 
 on:
-  workflow_dispatch:   # triggered by AWS Lambda (EventBridge → Lambda → GitHub API)
-
-env:
-  ANSIBLE_HOST_KEY_CHECKING: False
+  workflow_dispatch:   # triggered by AWS Lambda (EventBridge → GitHub API)
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Python & Ansible
+      - name: Install Python + Ansible
         run: |
           sudo apt update
           sudo apt install -y python3-pip
           pip3 install ansible boto3 botocore
-
-      - name: Install Ansible AWS collections
-        run: |
           ansible-galaxy collection install amazon.aws community.aws
 
       - name: Configure AWS Credentials
@@ -29,12 +23,26 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1"
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Run Ansible Playbook
+      # 🔑 Write EC2 private key from GitHub Secrets
+      - name: Write EC2 SSH Key
         run: |
-          ansible-playbook -i inventories/aws_ec2.yml heal.yml
+          echo "${{ secrets.AWS_EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
 
+      # ✅ Test connectivity first
       - name: Test Ansible AWS Inventory
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
         run: |
-          ansible-inventory -i inventories/aws_ec2.yml --graph
+          ansible -i inventories/aws_ec2.yml all -m ping \
+            --private-key private_key.pem -u ubuntu -vvv
+
+      # 🚀 Run full playbook
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: False
+        run: |
+          ansible-playbook -i inventories/aws_ec2.yml heal.yml \
+            --private-key private_key.pem
