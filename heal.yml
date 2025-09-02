@@ -1,0 +1,9 @@
+- hosts: tag_Name__WebServer
+  become: yes
+  vars:
+    
+  roles:
+    - common
+    # - hardening
+    # - monitoring
+    # - lb_registration

@@ -1,0 +1,29 @@
+name: AWS AutoHealing Deployment
+
+on:
+  workflow_dispatch:   # triggered by AWS Lambda (EventBridge → Lambda → GitHub API)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python & Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip3 install ansible boto3 botocore amazon.aws
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i inventories/aws_ec2.yml playbooks/site.yml

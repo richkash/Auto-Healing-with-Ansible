@@ -1,0 +1,9 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+filters:
+  vpc-id: vpc-0da5fbcbfaac337e0
+  instance-state-name: running
+keyed_groups:
+  - key: tags.Name
+    prefix: tag_Name_
