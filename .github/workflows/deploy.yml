@@ -37,7 +37,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: False
         run: |
           ansible -i inventories/aws_ec2.yml all -m ping \
-            --private-key private_key.pem -u ubuntu -vvv
+            --private-key private_key.pem -u ubuntu
 
       # 🚀 Run full playbook
       - name: Run Ansible Playbook
