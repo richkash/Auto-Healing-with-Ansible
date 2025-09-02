@@ -5,7 +5,7 @@ on:
 
 env:
   ANSIBLE_HOST_KEY_CHECKING: False
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
