@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook -i inventories/aws_ec2.yml playbooks/site.yml
+          ansible-playbook -i inventories/aws_ec2.yml heal.yml
 
       - name: Test Ansible AWS Inventory
         run: |
