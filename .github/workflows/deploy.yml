@@ -15,7 +15,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y python3-pip
-          pip3 install ansible boto3 botocore amazon.aws
+          pip3 install ansible boto3 botocore
+
+      - name: Install Ansible AWS collections
+        run: |
+          ansible-galaxy collection install amazon.aws community.aws
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -27,3 +31,7 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           ansible-playbook -i inventories/aws_ec2.yml playbooks/site.yml
+
+      - name: Test Ansible AWS Inventory
+        run: |
+          ansible-inventory -i inventories/aws_ec2.yml --graph
