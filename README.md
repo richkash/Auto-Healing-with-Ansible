@@ -8,26 +8,6 @@ When a new EC2 instance is launched (e.g., by Auto Scaling), it is automatically
 - Installed with a CloudWatch monitoring agent.
 - Registered with an Application Load Balancer.
 
-## Architecture
-
-Auto Scaling Group (EC2 launch/terminate)
-        │
-        ▼
-EventBridge Rule (EC2 state change)
-        │
-        ▼
-Lambda → GitHub Actions Workflow Dispatch
-        │
-        ▼
-GitHub Actions Runner (Ubuntu VM in GitHub Cloud)
-        │
-        ▼
-Runs Ansible with AWS EC2 Dynamic Inventory
-        │
-        ▼
-Targets EC2s directly over SSH (via public/private IPs in VPC)
-
-
 ## Workflow
 
 - AWS Auto Scaling Group launches EC2 instances.

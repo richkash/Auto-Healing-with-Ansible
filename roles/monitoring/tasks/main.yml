@@ -1,10 +1,14 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/monitoring
+- name: Download CloudWatch Agent .deb
+  get_url:
+    url: https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+    dest: /tmp/amazon-cloudwatch-agent.deb
+
 - name: Install CloudWatch Agent
-  package:
-    name: amazon-cloudwatch-agent
-    state: present
+  apt:
+    deb: /tmp/amazon-cloudwatch-agent.deb
 
 - name: Configure CloudWatch Agent
   copy:
