@@ -3,6 +3,9 @@ name: AWS AutoHealing Deployment
 on:
   workflow_dispatch:   # triggered by AWS Lambda (EventBridge → Lambda → GitHub API)
 
+env:
+  ANSIBLE_HOST_KEY_CHECKING: False
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
