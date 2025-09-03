@@ -7,7 +7,8 @@ on:
 
   workflow_dispatch: # Trigger from Lambda (via GitHub API)
     inputs:
-      event:
+      instance_id:
+        description: "Target EC2 Instance ID"
         required: false
 
 jobs:
@@ -32,13 +33,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
 
-      # 🔑 Write EC2 private key from GitHub Secrets
       - name: Write EC2 SSH Key
         run: |
           echo "${{ secrets.AWS_EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-      # ✅ Test connectivity first
       - name: Test Ansible AWS Inventory
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
@@ -46,10 +45,17 @@ jobs:
           ansible -i inventories/aws_ec2.yml all -m ping \
             --private-key private_key.pem -u ubuntu
 
-      # 🚀 Run full playbook
       - name: Run Ansible Playbook
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
         run: |
-          ansible-playbook -i inventories/aws_ec2.yml heal.yml \
-            --private-key private_key.pem
+          if [ -n "${{ github.event.inputs.instance_id }}" ]; then
+            echo "▶ Running only on new instance: ${{ github.event.inputs.instance_id }}"
+            ansible-playbook -i inventories/aws_ec2.yml heal.yml \
+              --private-key private_key.pem \
+              --limit "i-${{ github.event.inputs.instance_id }}"
+          else
+            echo "▶ Running on entire fleet (code push)"
+            ansible-playbook -i inventories/aws_ec2.yml heal.yml \
+              --private-key private_key.pem
+          fi
