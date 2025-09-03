@@ -1,7 +1,14 @@
 name: AWS AutoHealing Deployment
 
 on:
-  workflow_dispatch:   # triggered by AWS Lambda (EventBridge → GitHub API)
+  push:              # Trigger when code is updated
+    branches:
+      - main
+
+  workflow_dispatch: # Trigger from Lambda (via GitHub API)
+    inputs:
+      event:
+        required: false
 
 jobs:
   deploy:
